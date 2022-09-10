@@ -45,5 +45,21 @@ module.exports = (sequelize, DataTypes) => {
   modelName: 'user',
 });
 
+user.addHook('beforeCreate', (pendinguser) => {
+  let hash = bcrypt.hashSync(pendinguser.password, 12);
+  pendinguser.password = hash;
+});
+user.prototype.validatePassword = function (typedPassword) {
+  let isCorrectPassword = bcrypt.compareSync(typedPassword, this.password);
+  return isCorrectPassword;
+}
+
+user.prototype.toJSON = function () {
+  let userData = this.get();
+  delete userData.password; // this does not delete from database.
+  return userData;
+};
+
+
 return user; // add functions above 
 };
